@@ -8,6 +8,9 @@ import tkMessageBox
 class VioeConvertorGui:
 
     def __init__(self, master):
+        self.wgs84 = pyproj.Proj('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
+        self.lambert72 = pyproj.Proj('+proj=lcc +lat_1=51.16666723333333 +lat_2=49.8333339 +lat_0=90 +lon_0=4.367486666666666 +x_0=150000.013 +y_0=5400088.438 +ellps=intl +towgs84=-106.8686,52.2978,-103.7329,0.3366,-0.457,1.8422,-1.2747 +units=m +no_defs')
+
         frame = Frame(master)
         frame.pack()
 
@@ -38,12 +41,10 @@ class VioeConvertorGui:
         self.to_wgs84_button.pack(side=LEFT, padx=10, pady=15)
 
     def convert_to_lambert72(self):
-        src_proj = pyproj.Proj('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-        trg_proj = pyproj.Proj('+proj=lcc +lat_1=51.16666723333333 +lat_2=49.8333339 +lat_0=90 +lon_0=4.367486666666666 +x_0=150000.013 +y_0=5400088.438 +ellps=intl +towgs84=-106.8686,52.2978,-103.7329,0.3366,-0.457,1.8422,-1.2747 +units=m +no_defs')
         try:
             normalizer = CoordinateNormalizer()
             x_src, y_src = normalizer.normalize_degree((self.x_coord.get(), self.y_coord.get()))
-            convertor = CoordinateConvertor(src_proj, trg_proj)
+            convertor = CoordinateConvertor(self.wgs84, self.lambert72)
             (x, y) = convertor.convert_point((x_src, y_src))
         except:
             bad_input_error = "U kan enkel decimale graden ingeven of graden in het formaat:\nDD:MM:SS.SSSS..."
@@ -52,12 +53,10 @@ class VioeConvertorGui:
         tkMessageBox.showinfo('Lambert72', message)
 
     def convert_to_wgs84(self):
-        trg_proj = pyproj.Proj('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-        src_proj = pyproj.Proj('+proj=lcc +lat_1=51.16666723333333 +lat_2=49.8333339 +lat_0=90 +lon_0=4.367486666666666 +x_0=150000.013 +y_0=5400088.438 +ellps=intl +towgs84=-106.8686,52.2978,-103.7329,0.3366,-0.457,1.8422,-1.2747 +units=m +no_defs')
         try:
             normalizer = CoordinateNormalizer()
             x_src, y_src = normalizer.normalize_meter((self.x_coord.get(),self.y_coord.get()))
-            convertor = CoordinateConvertor(src_proj, trg_proj)
+            convertor = CoordinateConvertor(self.lambert72, self.wgs84)
             (x, y) = convertor.convert_point((x_src, y_src))
         except:
             bad_input_error = 'U kan enkele numerieke waarden ingeven in meter.'
