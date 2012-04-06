@@ -1,15 +1,15 @@
 #!/usr/bin/python
 
 from Tkinter import *
-import pyproj
 import tkMessageBox
-
+import pyproj
+from model.coordinateNormalizer import CoordinateNormalizer
+from model.coordinateConvertor import CoordinateConvertor
+import config.crs 
 
 class VioeConvertorGui:
 
     def __init__(self, master):
-        self.wgs84 = pyproj.Proj('+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs')
-        self.lambert72 = pyproj.Proj('+proj=lcc +lat_1=51.16666723333333 +lat_2=49.8333339 +lat_0=90 +lon_0=4.367486666666666 +x_0=150000.013 +y_0=5400088.438 +ellps=intl +towgs84=-106.869,52.2978,-103.724,0.33657,-0.456955,1.84218,-1.2747 +units=m +no_defs ')
 
         frame = Frame(master)
         frame.pack()
@@ -44,7 +44,7 @@ class VioeConvertorGui:
         try:
             normalizer = CoordinateNormalizer()
             x_src, y_src = normalizer.normalize_degree((self.x_coord.get(), self.y_coord.get()))
-            convertor = CoordinateConvertor(self.wgs84, self.lambert72)
+            convertor = CoordinateConvertor(crs.wgs84, crs.lambert72)
             (x, y) = convertor.convert_point((x_src, y_src))
         except:
             bad_input_error = "U kan enkel decimale graden ingeven of graden in het formaat:\nDD:MM:SS.SSSS..."
@@ -56,45 +56,13 @@ class VioeConvertorGui:
         try:
             normalizer = CoordinateNormalizer()
             x_src, y_src = normalizer.normalize_meter((self.x_coord.get(),self.y_coord.get()))
-            convertor = CoordinateConvertor(self.lambert72, self.wgs84)
+            convertor = CoordinateConvertor(crs.lambert72, crs.wgs84)
             (x, y) = convertor.convert_point((x_src, y_src))
         except:
             bad_input_error = 'U kan enkele numerieke waarden ingeven in meter.'
             tkMessageBox.showinfo('Invoerfout',bad_input_error)
         message = 'WGS84-coordinaten:\n' + str(x)+ 'Long' + ', ' + str(y) + 'Lat'
         tkMessageBox.showinfo('WGS84', message)
-
-
-
-class CoordinateConvertor:
-
-    def __init__(self, src_proj, trg_proj):
-        self.src_proj = src_proj
-        self.trg_proj = trg_proj
-
-    def convert_point(self, src_point):
-        x, y = pyproj.transform(self.src_proj, self.trg_proj, src_point[0], src_point[1])
-        return (x, y)
-
-
-
-class CoordinateNormalizer:
-
-    def __init__(self):
-        pass
-
-    def normalize_degree(self, point):
-        x = self.dms_to_float(point[0]) if ':' in point[0] else float(point[0])
-        y = self.dms_to_float(point[1]) if ':' in point[1] else float(point[1])
-        return (x, y)
-
-    def dms_to_float(self, dms_val):
-        return sum(float(x) / 60 ** n for (n, x) in enumerate(dms_val.split(':')))
-
-    def normalize_meter(self, point):
-        x =  float(point[0])
-        y = float(point[1])
-        return (x, y)
 
 
 
