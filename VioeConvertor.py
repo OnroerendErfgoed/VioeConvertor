@@ -1,10 +1,11 @@
 #!/usr/bin/python
 
-from view.vioeConvertorGui import VioeConvertorGui, Tk
+from Tkinter import Tk
+from controller.vioeController import VioeController
 
 if __name__ == "__main__":
 
     root = Tk()
     root.title('VioeConvertor')
-    app = VioeConvertorGui(root)
+    app = VioeController(root)
     root.mainloop()
